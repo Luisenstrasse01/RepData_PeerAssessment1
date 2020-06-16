@@ -5,13 +5,13 @@ output:
     keep_md: true
 ---
 
-Author: LUIS DELSO
 
 ## Loading and preprocessing the data
 
 This is the code needed for loading and preproccessing the data
 
-```{r loading code}
+
+```r
 data <- read.csv(unz("activity.zip","activity.csv"))
 ```
 
@@ -19,65 +19,88 @@ data <- read.csv(unz("activity.zip","activity.csv"))
 
 Calculate the total number of steps taken per day and make an Histogram
 
-```{r histogram}
+
+```r
 stepsbyday <- aggregate(data$steps, by=list(date=data$date), FUN=sum)
 hist(stepsbyday$x, xlab = "Steps/day", main = "Histogram of steps/day")
-
 ```
+
+![](PA1_template_files/figure-html/histogram-1.png)<!-- -->
 
 Calculate and report the mean and median of the total number of steps taken per day
 
-```{r mean and median}
+
+```r
 mean <- mean(stepsbyday$x, na.rm = TRUE)
 print(mean)
+```
+
+```
+## [1] 10766.19
+```
+
+```r
 median <- median(stepsbyday$x, na.rm = TRUE)
 print(median)
+```
 
 ```
-```{r formatting, echo = FALSE}
-options(scipen = 999, digits = 2)
+## [1] 10765
 ```
+
 #
-As shown above, the mean is `r mean` steps/day and median is `r median` steps/day
+As shown above, the mean is 10766.19 steps/day and median is 10765 steps/day
 
-```{r formatting2, echo = FALSE}
-options(scipen = 0, digits = 7)
-```
+
 ## What is the average daily activity pattern?
 
 Make a time series plot  of the 5-minute interval (x-axis) and the average number of steps taken, averaged across all days (y-axis)
 
-```{r average activity pattern}
+
+```r
 avstepsbyinterval <- aggregate(data$steps, by=list(interval=data$interval), FUN=mean, na.rm=TRUE)
 plot(avstepsbyinterval$interval, avstepsbyinterval$x, type = "l",xlab = "interval", ylab = "Average steps")
 ```
 
+![](PA1_template_files/figure-html/average activity pattern-1.png)<!-- -->
+
 Which 5-minute interval, on average across all the days in the dataset, contains the maximum number of steps?
 
-```{r maximum average steps by interval}
+
+```r
 maxavsteps <- max(avstepsbyinterval$x)
 maxinterval <- avstepsbyinterval$interval[avstepsbyinterval$x %in% maxavsteps]
 print(maxinterval)
 ```
-As shown above, the máximum average steps/day interval correspond to `r maxinterval`
+
+```
+## [1] 835
+```
+As shown above, the máximum average steps/day interval correspond to 835
 
 
 ## Imputing missing values
 
 1. Calculate and report the total number of missing values in the dataset (i.e. the total number of rows with NAs)
 
-```{r NAS}
+
+```r
 NAS <- sum(is.na(data$steps))
 print(NAS)
 ```
-The total number of NA's in the dataset is `r NAS`
+
+```
+## [1] 2304
+```
+The total number of NA's in the dataset is 2304
 
 2. Devise a strategy for filling in all of the missing values in the dataset. The strategy does not need to be sophisticated. For example, you could use the mean/median for that day, or the mean for that 5-minute interval, etc.
 
 I choose to fill it with the mean of the correspondatn 5-minute interval.
 
 3. Create a new dataset that is equal to the original dataset but with the missing data filled in.
-``` {r filling NAS algorithm}
+
+```r
 data2 <- data
 data2$steps[is.na(data$steps)] <- rep(avstepsbyinterval$x,61)[is.na(data$steps)]
 ```
@@ -86,26 +109,37 @@ data2$steps[is.na(data$steps)] <- rep(avstepsbyinterval$x,61)[is.na(data$steps)]
 
 Code for making the histogram
 
-```{r histogram with filled nas}
+
+```r
 stepsbyday2 <- aggregate(data2$steps, by=list(date=data2$date), FUN=sum)
 hist(stepsbyday2$x, xlab = "Steps/day", main = "Histogram of steps/day")
 ```
 
+![](PA1_template_files/figure-html/histogram with filled nas-1.png)<!-- -->
+
 Code for mean and median
 
-```{r mean and median of fixed data}
 
+```r
 mean <- mean(stepsbyday2$x)
 print(mean)
+```
+
+```
+## [1] 10766.19
+```
+
+```r
 median <- median(stepsbyday2$x)
 print(median)
-
-```
-```{r formatting 3, echo = FALSE}
-options(scipen = 999, digits = 2)
 ```
 
-The mean for fixed data is `r mean` steps/day and the median is `r median` steps/day.
+```
+## [1] 10766.19
+```
+
+
+The mean for fixed data is 10766.19 steps/day and the median is 10766.19 steps/day.
 They differ from the first part but not significantly
 
 ## Are there differences in activity patterns between weekdays and weekends?
@@ -113,7 +147,8 @@ They differ from the first part but not significantly
 For this part the weekdays() function may be of some help here. Use the dataset
 with the filled-in missing values for this part.
 
-```{r activity patterns}
+
+```r
 weekday <- c("lunes","martes", "miércoles", "jueves", "viernes")
 weekend <- c("sábado", "domingo")
 data2 <- transform(data2, daytype = ifelse(weekdays(as.Date(date)) %in% weekday, "weekday","weekend"))
@@ -127,6 +162,7 @@ with(avstepsbyintervalWE, plot(interval, x,type = "l",xlab = "interval",
                                ylab = "Average steps",ylim = c(0, max(avstepsbyinterval$x, na.rm = TRUE)), main = "WEEKENDS"))
 with(avstepsbyintervalWD, plot(interval, x,type = "l",xlab = "interval", 
                                ylab = "Average steps",ylim = c(0, max(avstepsbyinterval$x, na.rm = TRUE)), main = "WEEKDAYS"))
-
 ```
+
+![](PA1_template_files/figure-html/activity patterns-1.png)<!-- -->
 
